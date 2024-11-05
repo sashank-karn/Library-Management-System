@@ -3,7 +3,6 @@
 #include <string>
 using namespace std;
 
-// Base class MediaItem
 class MediaItem {
 protected:
     string title;
@@ -12,14 +11,8 @@ protected:
     int itemID;
 
 public:
-    MediaItem(string t, string a, int y, int id) {
-        title = t;
-        author = a;
-        year = y;
-        itemID = id;
-    }
+    MediaItem(string t, string a, int y, int id) : title(t), author(a), year(y), itemID(id) {}
 
-    // Virtual method to display media item details, to be overridden
     virtual void displayDetails() {
         cout << "\nTitle: " << title << endl;
         cout << "Author: " << author << endl;
@@ -27,15 +20,15 @@ public:
         cout << "Item ID: " << itemID << endl;
     }
 
-    // Virtual method for borrowing (to be overridden by subclasses)
     virtual void borrowItem() {
         cout << "Borrowing item..." << endl;
     }
 
+    int getItemID() { return itemID; }
+
     virtual ~MediaItem() {}
 };
 
-// Derived class for Book
 class Book : public MediaItem {
 private:
     int pages;
@@ -44,15 +37,10 @@ private:
 
 public:
     Book(string t, string a, int y, int id, int p, bool hc)
-        : MediaItem(t, a, y, id) {
-        pages = p;
-        isHardcover = hc;
-        stock = 5; // Initial stock for the book
-    }
+        : MediaItem(t, a, y, id), pages(p), isHardcover(hc), stock(5) {}
 
-    // Override displayDetails method
     void displayDetails() override {
-        MediaItem::displayDetails();  // Call base class method
+        MediaItem::displayDetails();
         cout << "Pages: " << pages << endl;
         cout << "Hardcover: " << (isHardcover ? "Yes" : "No") << endl;
         cout << "Stock: " << stock << endl;
@@ -68,7 +56,6 @@ public:
     }
 };
 
-// Derived class for eBook
 class eBook : public MediaItem {
 private:
     double fileSizeMB;
@@ -76,13 +63,10 @@ private:
 
 public:
     eBook(string t, string a, int y, int id, double size, string f)
-        : MediaItem(t, a, y, id) {
-        fileSizeMB = size;
-        format = f;
-    }
+        : MediaItem(t, a, y, id), fileSizeMB(size), format(f) {}
 
     void displayDetails() override {
-        MediaItem::displayDetails();  
+        MediaItem::displayDetails();
         cout << "File Size: " << fileSizeMB << " MB" << endl;
         cout << "Format: " << format << endl;
     }
@@ -99,13 +83,10 @@ private:
 
 public:
     Audiobook(string t, string a, int y, int id, int duration, string n)
-        : MediaItem(t, a, y, id) {
-        durationMinutes = duration;
-        narrator = n;
-    }
+        : MediaItem(t, a, y, id), durationMinutes(duration), narrator(n) {}
 
     void displayDetails() override {
-        MediaItem::displayDetails(); 
+        MediaItem::displayDetails();
         cout << "Duration: " << durationMinutes << " minutes" << endl;
         cout << "Narrator: " << narrator << endl;
     }
@@ -115,7 +96,6 @@ public:
     }
 };
 
-// Library class to manage media itemss
 class Library {
 private:
     vector<MediaItem*> items;
@@ -125,23 +105,26 @@ public:
         items.push_back(item);
     }
 
-    // Method to display all items in the library
     void displayAllItems() {
+        if (items.empty()) {
+            cout << "\nNo items in the library.\n";
+            return;
+        }
+
         for (size_t i = 0; i < items.size(); i++) {
-            cout << "\nItem " << (i+1) << ":" << endl;
+            cout << "\nItem " << (i + 1) << ":" << endl;
             items[i]->displayDetails();
         }
     }
 
-    // Method to borrow an item by ID
     void borrowByID(int id) {
-        for (size_t i = 0; i < items.size(); i++) {
-            if (id == i + 1) {
-                items[i]->borrowItem();
+        for (MediaItem* item : items) {
+            if (item->getItemID() == id) {
+                item->borrowItem();
                 return;
             }
         }
-        cout << "Item not found." << endl;
+        cout << "Item with ID " << id << " not found!" << endl;
     }
 
     ~Library() {
@@ -172,7 +155,7 @@ int main() {
         }
 
         string title, author, format, narrator;
-        int year, id, pages, duration, itemID;
+        int year, itemID, pages, duration;
         double fileSize;
         bool isHardcover;
 
@@ -218,9 +201,9 @@ int main() {
                 break;
 
             case 5:
-                cout << "\nEnter the item number to borrow: ";
-                cin >> id;
-                myLibrary.borrowByID(id);
+                cout << "\nEnter the item ID to borrow: ";
+                cin >> itemID;
+                myLibrary.borrowByID(itemID);
                 break;
 
             default:
